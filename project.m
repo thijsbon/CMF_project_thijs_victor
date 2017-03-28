@@ -1,4 +1,5 @@
 %% INPUT VARIABLES
+% this is a test for github %
 clear all; close all;
 Nz              = 100;  % number of cells in z-direction (should be even!)
 Nx              = 1; 

@@ -1,14 +1,16 @@
 % Initialise values
 %% Constants
-mu = mu*ones(1,Nz);
+mu = mu*ones(1,Nz+2);
 nu_c = nu;              %Material property
-nu = nu*ones(1,Nz);     %Total Viscosity
-u = zeros(1,Nz);
-dpdx = dpdx*ones(1,Nz);
+nu = nu*ones(1,Nz+2);     %Total Viscosity
+u = zeros(1,Nz+2);
+dpdx = dpdx*ones(1,Nz+2);
 Von_Karman = 0.41;      %Von Karman Constant
+Karman_0 = 0.09;%0.085;
+Karman_ratio = Karman_0/Von_Karman;
 Boundary_Layer_Size = H-0.5*H*(bcswitch==0);
-u_star = zeros(1,Nz);
-
+l1 = Von_Karman*zc.*(zc<Boundary_Layer_Size*Karman_ratio)+Karman_0*Boundary_Layer_Size*(zc>Boundary_Layer_Size*Karman_ratio);
+l = [l1(1:Nz/2+1) flip(l1(1:Nz/2+1))];
 %% DUMMY VARIABLES
 dt = 1;
 
@@ -19,8 +21,8 @@ elseif prescribeswitch == 1
     if bcswitch == 0
         
     elseif bcswitch == 1
-        u = Q/sum(dz)*ones(1,Nz);
-        dpdx = 12*Q*mu(1).*ones(1,Nz)/H^3;
+        u = Q/sum(dz)*ones(1,Nz+2);
+        dpdx = -12*Q*mu(1).*ones(1,Nz+2)/H^3;
     elseif bcswitch == 2
         
     end

@@ -24,7 +24,7 @@ prescribeswitch = 0;    % 0 if pressure gradient prescribed,
                         
 %% Simulation
 max_iter = 20000;       % Maximum iterations
-min_residue = 1e-6;     % Value at which a solution is considered converged
+min_residue = 1e-8;     % Value at which a solution is considered converged
                         % A good value is 1e-6, if this is lowered, weird
                         % results are considered converged.
 % Turbulence on/off
@@ -34,11 +34,13 @@ turbulent       = 1;    % 0 if not tubulent;
 dudzwall        = 100;  % velocity gradient at the wall
 tauw            = 0.000001;  % wall shear stress
 wall            = 1;    % 1 if lower wall velocity gradient specified, 2 for upper (doesn't work yet)
-rho             = 1000;    % density
-mu              = 10^-6;   %viscosity
+rho             = 1;    % density
+mu              = 15*10^-6;   %viscosity
 nu              = mu/rho;   %viscosity
-dpdx            = -100;   % prescribed pressure gradient
-Q               =  1;    % prescribed flow rate per area in m^2/s (2-dimensional)
+dpdx            = -0.001;   % prescribed pressure gradient
+Q               =  20;    % prescribed flow rate per area in m^2/s (2-dimensional)
+
+show_analytic = 1;      %Use 1 to show analytic value
 
 Mesh
 Initialiser

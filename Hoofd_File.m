@@ -8,8 +8,8 @@ Nz              = 100;  % number of cells in z-direction (should be even!)
 Nx              = 1; 
 H               = 1000; % height of channel
 L               = 1;    % length of channel
-Mesh_type       = 1;    % Type of Mesh, 1 is refinement at both boundaries, 2 is refinement at only bottom
-exp             = 1.01;  % mesh expansion factor
+Mesh_type       = 2;    % Type of Mesh, 1 is refinement at both boundaries, 2 is refinement at only bottom
+exp             = 1.01; % mesh expansion factor
 % Boundary Conditions
 uwall1          = 0;    % velocity at lower wall
 uwall2          = 25;   % velocity at upper wall
@@ -36,10 +36,10 @@ turbulent       = 1;    % 0 if not tubulent;
 dudzwall        = 100;  % velocity gradient at the wall
 
 wall            = 1;    % 1 if lower wall velocity gradient specified, 2 for upper (doesn't work yet)
-rho             = 1.225;    % density
+rho             = 1.225;    % density of air
 mu              = 15*10^-6;   %viscosity
 nu              = mu/rho;   %viscosity
-dpdx            = -0.0012;   % prescribed pressure gradient
+dpdx            = -0.0009;   % prescribed pressure gradient
 Q               =  2;    % prescribed flow rate per area in m^2/s (2-dimensional)
 
 show_analytic = 0;      %Use 1 to show analytic value

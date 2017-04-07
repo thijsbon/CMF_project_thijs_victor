@@ -49,7 +49,7 @@ while iter<max_iter && residue>min_residue
     elseif bcswitch == 2 %velocity at upper wall, tauw at lower wall
         u(end)=-u(end-1)+2*uwall2;
         % WALL FUNCTION:
-        u(2) = utau/Von_Karman*log(yplus(2)) + 5;
+        % u(2) = utau/Von_Karman*log(yplus(2)) + 5;
     end
     Qnew = u(2:end-1)*dz(2:end-1)';
     residue = (abs(Qnew-Q))/Q*(prescribeswitch == 1)+abs(u_change-mean(u))/u_change*(prescribeswitch ==0);

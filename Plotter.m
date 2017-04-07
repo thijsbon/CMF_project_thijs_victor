@@ -17,3 +17,18 @@ plot(u_analytic(2:end-1)/max(u_analytic),zc(2:end-1),'r')
 legend('numerical','analytic')
 xlabel('u/u_max'); ylabel('z(m)')
 grid on
+
+% %%
+% figure
+% semilogx(zc(2:end-1),u(2:end-1),'ob');
+% %%
+% figure
+% hold on
+% plot(u(2:end-1)/mean(u),zc(2:end-1),'ob')
+% plot(u_analytic(2:end-1)/mean(u_analytic),zc(2:end-1),'r')
+% legend('numerical','analytic')
+% xlabel('u/<u>'); ylabel('z(m)')
+% grid on
+% %%
+% figure
+% plot(zf(2:end-1),nu_t,'o')

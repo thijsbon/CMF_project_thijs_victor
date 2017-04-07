@@ -33,20 +33,23 @@ while iter<max_iter && residue>min_residue
         
     end
     %% Enforce Boundary Conditions
-    if bcswitch == 0
+    if bcswitch == 0 %velocity at both walls specified
         u(1)=-u(2)+2*uwall1;
         u(end)=-u(end-1)+2*uwall2;
-    elseif bcswitch == 1
+    elseif bcswitch == 1 %gradient at upper boundary specified
         u(1)=-u(2)+2*uwall1;
         u(end)=u(end-1);
-    elseif bcswitch == 3
+    elseif bcswitch == 3 %gradient at lower boundary specified
         u(1)=u(2);
         u(end)=-u(end-1)+2*uwall2;
+    elseif bcswitch == 2 %velocity at upper wall, tauw at lower wall
+        u(end)=-u(end-1)+2*uwall2;
+        % WALL FUNCTION:
+        u(2) = utau/Von_Karman*log(yplus(2)) + 5;
     end
     Qnew = u(2:end-1)*dz(2:end-1)';
     residue = (abs(Qnew-Q))/Q*(prescribeswitch == 1)+abs(u_change-mean(u))/u_change*(prescribeswitch ==0);
     u_change = mean(u);
     iter = iter+1
 end
-Qnew
 Reynolds = u_change*H/nu_c

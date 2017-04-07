@@ -23,6 +23,7 @@ if Mesh_type == 2; %refinement at only bottom surface
    zf      = [-zf(2) zf H+(H-zf(end-1))];    %add faces of ghost cells
    dz      = diff(zf);                       %size of control volumes
    zc      = zf(1:end-1)+dz/2;               %center coordinates
-   plot(0,zf,'xr',0,zc,'ob');
+   dzc     = diff(zc);                       %differences between centers;
+   %plot(0,zf,'xr',0,zc,'ob');
 end
     

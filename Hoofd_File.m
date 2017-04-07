@@ -9,7 +9,7 @@ Nx              = 1;
 H               = 1000; % height of channel
 L               = 1;    % length of channel
 Mesh_type       = 1;    % Type of Mesh, 1 is refinement at both boundaries, 2 is refinement at only bottom
-exp             = 1.1;  % mesh expansion factor
+exp             = 1.01;  % mesh expansion factor
 % Boundary Conditions
 uwall1          = 0;    % velocity at lower wall
 uwall2          = 25;   % velocity at upper wall
@@ -18,6 +18,7 @@ bcswitch        = 2;    % 0 if velocity is specified,
                         % 1 if gradient at upper boundary is specified,
                         % 3 if gradient at lower boundary is specified,
                         % 2 if wall shear stress is specified (at bottom)
+wallfunction   = 1; %1 if wall function must be used (for wall shear stress)
 % Global Boundary Conditions
 prescribeswitch = 0;    % 0 if pressure gradient prescribed, 
                         % 1 if flow rate prescrpibed

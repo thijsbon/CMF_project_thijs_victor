@@ -17,7 +17,11 @@ while iter<max_iter && residue>min_residue
     %u_star_D = sqrt(tau_wall_D/rho);
     %y_star_D = zc(2:end-1).*u_star_D./nu_c;
     %y_star_U = (H-zc(2:end-1)* (bcswitch==0) ).*u_star_U./nu_c;
-    for k = 2:Nz+1
+    % WALL FUNCTION:
+    if wallfunction == 1;
+        u(2) = utau/Von_Karman*log(yplus(2)) + 5;
+    end
+    for k = 2+(wallfunction == 1):Nz+1; %if wall function used, start at 3d cell.
         %% Turbulence
         %nu_t(k) = l(k)^2*(0.5*abs((u(k+1)-u(k)))/dzc(k)+0.5*abs((u(k)-u(k-1)))/dzc(k-1));
         nu_t(k) = l(k)^2*abs((u(k+1)-u(k-1))/(dzc(k)+dzc(k-1)));
@@ -28,7 +32,7 @@ while iter<max_iter && residue>min_residue
         nu_D = (nu(k)*dz(k)+nu(k-1)*dz(k-1))/(dz(k)+dz(k-1));
         au = nu_U/dzc(k);
         ad = nu_D/dzc(k-1);
-        ap = au+ad;        
+        ap = au+ad;
         u(k) = (u(k-1)*ad+u(k+1)*au-1/rho*dpdx(k)*dz(k))/ap;          
         
     end

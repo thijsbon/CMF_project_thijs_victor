@@ -1,10 +1,18 @@
 % Initialise values
+tic
+Running_time = 0;
 %% Constants
 mu = mu*ones(1,Nz+2);
 nu_c = nu;              %Material property
-nu = nu*ones(1,Nz+2);     %Total Viscosity
-u = zeros(1,Nz+2);
-dpdx = dpdx*ones(1,Nz+2);
+if Steady_State_on==1
+    nu = nu*ones(Nz+2,1);     %Total Viscosity
+    u = zeros(Nz+2,1);
+    dpdx = dpdx*ones(Nz+2,1);
+elseif Steady_State_on==0
+    nu = nu*ones(Nz+2,Time_steps+1);     %Total Viscosity
+    u = zeros(Nz+2,Time_steps+1);
+    dpdx = dpdx*ones(Nz+2,Time_steps+1);
+end
 Von_Karman = 0.41;      %Von Karman Constant
 Karman_0 = 0.09;%0.085;
 Cs = 0.17;              %Lilly-Smagorinsky constant
@@ -29,7 +37,9 @@ end
 
 %% DUMMY VARIABLES
 dt = 1;
-
+if unsteady_function==1
+        Q_original = Q;
+end
 %% Solution method
 if prescribeswitch == 0
     
@@ -43,3 +53,9 @@ elseif prescribeswitch == 1
         
     end
 end
+
+%format shortEng
+%format compact
+format shortG
+Time_it_takes = 0;
+Running_time = toc;

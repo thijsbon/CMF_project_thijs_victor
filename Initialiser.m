@@ -21,9 +21,11 @@ Karman_ratio = Karman_0/Von_Karman;
 Boundary_Layer_Size = H-0.5*H*(bcswitch==0);
 l1 = Von_Karman*zc.*(zc<Boundary_Layer_Size*Karman_ratio)+Karman_0*Boundary_Layer_Size*(zc>Boundary_Layer_Size*Karman_ratio);
 if Mesh_type == 1; % symmetric l for symmetric mesh
+
     l = [l1(1:Nz/2+1) flip(l1(1:Nz/2+1))];
 elseif Mesh_type == 2; % asymmetric l for asymmetric mesh
     l = l1;
+
 end;
 
 %% calculate yplus etc.

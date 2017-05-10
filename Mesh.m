@@ -15,8 +15,10 @@ if Mesh_type == 1 %refine at bottom and top
 end
 %%
 if Mesh_type == 2; %refinement at only bottom surface
+
    dz1     = H/(1+sum(expansion_factor.^(1:Nz-1))); %size of first cell
    dzvec   = [dz1 dz1 expansion_factor.^(1:Nz-1)*dz1];  %vector with sizes of cells in lower half of domain, ghost cell has same size as first cell in domain
+
    % for environmental flow with open upper wall: perhaps only grid refinement
    % near bottom?
    zf      = [0 cumsum(dzvec(2:end))];

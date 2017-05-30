@@ -7,6 +7,7 @@ Steady_State_on = 0;    % Use 1 for steady state
                         % Use 0 for transient mode
 Steady_State_Start = 1; % When running transient, use this to calculate the
                         % steady state first and then run transient
+
 unsteady_function = 0;  % Use only for transient, use 0 for prescribed pressure
                         % Use 1 for flow rate
                         % These can be modified in the function files
@@ -14,12 +15,15 @@ Time_steps = 150;        % Use for transient mode
 Delta_t = 5;         % Seconds between time steps
 omega_unsteady = 0.01;   % Frequency (in Hz) at which the unsteady_functions change
 tf = 1;                 % 0 for explicit time scheme
+
                         % 1 for implicit time scheme
 
 % Mesh
 Nz              = 100;  % number of cells in z-direction (should be even!)
 Nx              = 1; 
-H               = 1; % height of channel
+
+H               = 1000; % height of channel
+
 L               = 1;    % length of channel
 
 Mesh_type       = 1;    % Type of Mesh, 1 is refinement at both boundaries, 2 is refinement at only bottom
@@ -27,9 +31,11 @@ expansion_factor= 1.1;  %mesh expansion factor
 
 % Boundary Conditions
 uwall1          = 0;    % velocity at lower wall
+
 uwall2          = 0;   % velocity at upper wall
 tauw            = 0.1;  % wall shear stress
 bcswitch        = 0;    % 0 if velocity is specified, 
+
                         % 1 if gradient at upper boundary is specified,
                         % 3 if gradient at lower boundary is specified,
 
@@ -37,7 +43,7 @@ bcswitch        = 0;    % 0 if velocity is specified,
 wallfunction   = 0;     %1 if wall function must be used (for wall shear stress)
 
 % Global Boundary Conditions
-prescribeswitch = 0;    % 0 if pressure gradient prescribed, 
+prescribeswitch = 1;    % 0 if pressure gradient prescribed, 
                         % 1 if flow rate prescrpibed
 
                         
@@ -61,7 +67,9 @@ wall            = 1;    % 1 if lower wall velocity gradient specified, 2 for upp
 rho             = 1.225;    % density of air
 mu              = 15*10^-6;   %viscosity
 nu              = mu/rho;   %viscosity
+
 dpdx            = -0.001;   % prescribed pressure gradient
+
 Q               =  2;    % prescribed flow rate per area in m^2/s (2-dimensional)
 
 

@@ -35,8 +35,10 @@ for t=1:Time_steps
     
         %% dpdx change (in case of the prescribed flow rate)
         %dpdx = dpdx+(max_iter-iter)*mean(nu)*(Qnew-Q)/H^3*(prescribeswitch == 1);
+
         dpdx(:,t+1) = unsteady_dpdx(t,Delta_t,dp_0,omega_unsteady)*(unsteady_function==0)...
             + dpdx(:,t+1)*(unsteady_function==1) + (Qnew-Q)/Q*0.01*(prescribeswitch == 1);
+
     
         
         % WALL FUNCTION:
@@ -63,7 +65,9 @@ for t=1:Time_steps
             u(k,t+1) = (ad*(tf*u(k-1,t+1)+(1-tf)*u(k-1,t)) ...          %down cells
                         +au*(tf*u(k+1,t+1)+(1-tf)*u(k+1,t)) ...         %up cells
                         +(ap0-(1-tf)*au-(1-tf)*ad)*u(k,t) ...           %centre cells
+
                         -1/rho*dpdx(k,t+1)*dz(k))/ap;                     %pressure term
+
         end
         %% Enforce Boundary Conditions
         if bcswitch == 0 %velocity at both walls specified

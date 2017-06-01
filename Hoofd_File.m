@@ -3,7 +3,7 @@ close all
 clc
 %% INPUT VARIABLES
 %% Steady State or transient
-Steady_State_on = 0;    % Use 1 for steady state
+Steady_State_on = 1;    % Use 1 for steady state
                         % Use 0 for transient mode
 Steady_State_Start = 1; % When running transient, use this to calculate the
                         % steady state first and then run transient
@@ -34,16 +34,16 @@ uwall1          = 0;    % velocity at lower wall
 
 uwall2          = 0;   % velocity at upper wall
 tauw            = 0.1;  % wall shear stress
-bcswitch        = 0;    % 0 if velocity is specified, 
-
+bcswitch        = 1;    % 0 if velocity is specified, 
                         % 1 if gradient at upper boundary is specified,
+                        % 2 if wall shear stress is specified > USE THIS
+                        % FOR WALL FUNCTION
                         % 3 if gradient at lower boundary is specified,
-
-                        % 2 if wall shear stress is specified
-wallfunction   = 0;     %1 if wall function must be used (for wall shear stress)
+wallfunction   = 1;     %1 if wall function must be used (for wall shear stress)
+ks             = 3;     %roughness: average height of obstacles
 
 % Global Boundary Conditions
-prescribeswitch = 1;    % 0 if pressure gradient prescribed, 
+prescribeswitch = 0;    % 0 if pressure gradient prescribed, 
                         % 1 if flow rate prescrpibed
 
                         

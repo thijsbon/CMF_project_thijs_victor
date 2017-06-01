@@ -30,13 +30,13 @@ elseif Mesh_type == 2; % asymmetric l for asymmetric mesh
 end;
 
 %% calculate yplus etc.
-if bcswitch == 2; %i.e. tau_wall specified at bottom
-   utau = sqrt(tauw/rho);
-   yplus = zc.*utau./nu_c;
-   if yplus(2) > 5;
-       disp('y_1^+ > 5, wall function is used')
-   end
-end
+% if bcswitch == 2; %i.e. tau_wall specified at bottom
+%    utau = sqrt(tauw/rho);
+%    yplus = zc.*utau./nu_c;
+%    if yplus(2) > 5;
+%        disp('y_1^+ > 5, wall function is used')
+%    end
+% end
 
 %% DUMMY VARIABLES
 dt = 1;

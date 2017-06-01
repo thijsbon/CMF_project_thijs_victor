@@ -2,6 +2,7 @@
 tic
 Running_time = 0;
 %% Constants
+dp_0 = dpdx;
 mu = mu*ones(1,Nz+2);
 nu_c = nu;              %Material property
 if Steady_State_on==1

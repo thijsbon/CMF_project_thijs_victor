@@ -52,7 +52,7 @@ while iter<max_iter && residue>min_residue
         au = nu_U/dzc(k);
         ad = nu_D/dzc(k-1);
         ap = au+ad;
-<
+
         u(k,1) = (u(k-1,1)*ad+u(k+1,1)*au-1/rho*dpdx(k,1)*dz(k))/ap;          
 
         

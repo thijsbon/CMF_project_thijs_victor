@@ -2,6 +2,10 @@ clear all
 close all
 clc
 %% INPUT VARIABLES
+%% PROJECT
+project        = 1; %project = on
+delta_wall     = 50; % wall boundary layer size (20 - 100 m)
+u_end_boundary = 10; % wind speed at height of delta_wall (-20 - 20 m/s);
 %% Steady State or transient
 Steady_State_on = 1;    % Use 1 for steady state
                         % Use 0 for transient mode
@@ -22,12 +26,14 @@ tf = 1;                 % 0 for explicit time scheme
 Nz              = 100;  % number of cells in z-direction (should be even!)
 Nx              = 1; 
 
-H               = 1000; % height of channel
+H               = 500; % height of channel (100-1000 m)
 
 L               = 1;    % length of channel
 
-Mesh_type       = 1;    % Type of Mesh, 1 is refinement at both boundaries, 2 is refinement at only bottom
+Mesh_type       = 2;    % Type of Mesh, 1 is refinement at both boundaries, 2 is refinement at only bottom
 expansion_factor= 1.1;  %mesh expansion factor
+
+
 
 % Boundary Conditions
 uwall1          = 0;    % velocity at lower wall
@@ -68,7 +74,7 @@ rho             = 1.225;    % density of air
 mu              = 15*10^-6;   %viscosity
 nu              = mu/rho;   %viscosity
 
-dpdx            = -0.001;   % prescribed pressure gradient
+dpdx            = -0.0001;   % prescribed pressure gradient
 
 Q               =  2;    % prescribed flow rate per area in m^2/s (2-dimensional)
 

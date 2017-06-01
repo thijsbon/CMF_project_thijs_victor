@@ -68,6 +68,9 @@ while iter<max_iter && residue>min_residue
     elseif bcswitch == 2 %velocity at upper wall, tauw at lower wall
         u(end,1)=-u(end-1,1)+2*uwall2;
     end
+    if project == 1
+        u(delta_wall_cell) = u_end_boundary;
+    end
 % WALL FUNCTION:
     if wallfunction == 1;
         u(2,1) = mu(2)./(rho*zc(2))*(1/Von_Karman*log(32.6*zc(2)/ks+1))^2;

@@ -29,14 +29,21 @@ elseif Mesh_type == 2; % asymmetric l for asymmetric mesh
 
 end;
 
-%% calculate yplus etc.
-if bcswitch == 2; %i.e. tau_wall specified at bottom
-   utau = sqrt(tauw/rho);
-   yplus = zc.*utau./nu_c;
-   if yplus(2) > 5;
-       disp('y_1^+ > 5, wall function is used')
-   end
+%% PROJECT
+if project == 1;
+delta_wall_cell     = find(min(abs(delta_wall-zc)) == abs(delta_wall - zc));
+dpdx(1:delta_wall_cell) = 0; 
+dpdx(delta_wall_cell+1:delta_wall_cell+10) = (1-exp(-(1:2:19)))*dpdx(delta_wall_cell+11);
 end
+
+%% calculate yplus etc.
+% if bcswitch == 2; %i.e. tau_wall specified at bottom
+%    utau = sqrt(tauw/rho);
+%    yplus = zc.*utau./nu_c;
+%    if yplus(2) > 5;
+%        disp('y_1^+ > 5, wall function is used')
+%    end
+% end
 
 %% DUMMY VARIABLES
 dt = 1;

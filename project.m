@@ -1,7 +1,10 @@
 %% INPUT VARIABLES
+% this is a test for github %
+% now another test %
 clear all; close all;
-Nz              = 100;  % number of cells in z-direction (should be even!)
-Nx              = 1; 
+Nz              = 100;  % number of cells in z-direction inside domain (excluding ghost cells)
+                        % (should be even!)
+Nx              = 1;    % never becomes larger than 1?
 H               = 1;    % height of channel
 L               = 1;    % length of channel
 uwall1          = 0;    % velocity at wall1

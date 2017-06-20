@@ -1,3 +1,4 @@
+l_effective = zeros(Nz+2,Time_steps);
 for t=1:Time_steps
     tic
     iter = 0;
@@ -21,12 +22,16 @@ for t=1:Time_steps
         if Van_Driest_Damping_on == 1
             Van_Driest_A = 26;
             Van_Driest_function = zeros(1,length(l));
-            Van_Driest_function = (1-exp(-abs(min(y_plus_D,y_plus_U))/Van_Driest_A));
+            if project == 1
+                Van_Driest_function = (1-exp(-abs(y_plus_D)/Van_Driest_A));
+            else
+                Van_Driest_function = (1-exp(-abs(min(y_plus_D,y_plus_U))/Van_Driest_A));
+            end
             l1 = Von_Karman*zc.*Van_Driest_function;
             l2 = Von_Karman*flip(zc).*Van_Driest_function;
             l3 = min(l1,l2)+(bcswitch==1)*l1;
             l4 = Karman_0*Boundary_Layer_Size; 
-            l_effective = min(l3,l4);
+            l_effective(:,t) = min(l3,l4);
         end
         
         
@@ -41,10 +46,7 @@ for t=1:Time_steps
 
     
         
-        % WALL FUNCTION:
-        if wallfunction == 1;
-            u(2,t+1) = utau/Von_Karman*log(yplus(2)) + 5;
-        end
+       
         for k = 2+(wallfunction == 1):Nz+1; %if wall function used, start at 3d cell.
             %% Turbulence
             %nu_t(k) = l(k)^2*(0.5*abs((u(k+1)-u(k)))/dzc(k)+0.5*abs((u(k)-u(k-1)))/dzc(k-1));
@@ -65,7 +67,6 @@ for t=1:Time_steps
             u(k,t+1) = (ad*(tf*u(k-1,t+1)+(1-tf)*u(k-1,t)) ...          %down cells
                         +au*(tf*u(k+1,t+1)+(1-tf)*u(k+1,t)) ...         %up cells
                         +(ap0-(1-tf)*au-(1-tf)*ad)*u(k,t) ...           %centre cells
-
                         -1/rho*dpdx(k,t+1)*dz(k))/ap;                     %pressure term
 
         end
@@ -84,6 +85,11 @@ for t=1:Time_steps
             % WALL FUNCTION:
             % u(2) = utau/Von_Karman*log(yplus(2)) + 5;
         end
+        % WALL FUNCTION:
+    if wallfunction == 1;
+        u(2,t+1) = mu(2)./(rho*zc(2))*(1/Von_Karman*log(32.6*zc(2)/ks+1))^2;
+        %utau/Von_Karman*log(yplus(2)) + 5;
+    end
         Qnew = u(2:end-1,t+1)'*dz(2:end-1)';
         residue = (abs(Qnew-Q))/Q*(prescribeswitch == 1)+abs(u_change-mean(u(:,t+1)))/u_change*(prescribeswitch ==0);
         u_change = mean(u(:,t+1));

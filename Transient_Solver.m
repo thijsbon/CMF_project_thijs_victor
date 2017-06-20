@@ -1,3 +1,4 @@
+l_effective = zeros(Nz+2,Time_steps);
 for t=1:Time_steps
     tic
     iter = 0;
@@ -21,12 +22,16 @@ for t=1:Time_steps
         if Van_Driest_Damping_on == 1
             Van_Driest_A = 26;
             Van_Driest_function = zeros(1,length(l));
-            Van_Driest_function = (1-exp(-abs(min(y_plus_D,y_plus_U))/Van_Driest_A));
+            if project == 1
+                Van_Driest_function = (1-exp(-abs(y_plus_D)/Van_Driest_A));
+            else
+                Van_Driest_function = (1-exp(-abs(min(y_plus_D,y_plus_U))/Van_Driest_A));
+            end
             l1 = Von_Karman*zc.*Van_Driest_function;
             l2 = Von_Karman*flip(zc).*Van_Driest_function;
             l3 = min(l1,l2)+(bcswitch==1)*l1;
             l4 = Karman_0*Boundary_Layer_Size; 
-            l_effective = min(l3,l4);
+            l_effective(:,t) = min(l3,l4);
         end
         
         

@@ -3,7 +3,7 @@ close all
 clc
 %% INPUT VARIABLES
 %% PROJECT
-project        = 1; %project = on
+project        = 1;  %project = on
 delta_wall     = 50; % wall boundary layer size (20 - 100 m)
 u_end_boundary = 10; % wind speed at height of delta_wall (-20 - 20 m/s);
 %% Steady State or transient
@@ -15,8 +15,8 @@ Steady_State_Start = 1; % When running transient, use this to calculate the
 unsteady_function = 0;  % Use only for transient, use 0 for prescribed pressure
                         % Use 1 for flow rate
                         % These can be modified in the function files
-Time_steps = 100000;        % Use for transient mode
-Delta_t = 0.01;         % Seconds between time steps
+Time_steps = 100;        % Use for transient mode
+Delta_t = 10;         % Seconds between time steps
 omega_unsteady = 0.01;   % Frequency (in Hz) at which the unsteady_functions change
 tf = 1;                 % 0 for explicit time scheme
 

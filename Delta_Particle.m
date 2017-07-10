@@ -43,6 +43,7 @@ if rain_on == 1
     Zd_tt = zeros(Nd,Time_steps_for_particles); Zd_tt(:,1) = Zd(:,t);
     F_stokes_xd_tt = zeros(Nd,Time_steps_for_particles); F_stokes_xd_tt(:,1) = F_stokes_xd(:,t);
     F_stokes_yd_tt = zeros(Nd,Time_steps_for_particles); F_stokes_yd_tt(:,1) = F_stokes_yd(:,t);
+    F_stokes_zd_tt = zeros(Nd,Time_steps_for_particles); F_stokes_zd_tt(:,1) = F_stokes_zd(:,t);
 end
 
 
@@ -129,6 +130,8 @@ for tt = 1:Time_steps_for_particles
      Zp_tt(:,tt+1) = Zp_tt(:,tt) + Vpz_tt(:,tt)*Delta_Time_for_particles + 0.5*a_z_tt(:,tt)*Delta_Time_for_particles^2;
      % Check if particle does not go below ground
      Zp_tt(:,tt+1) = (~isnan(Zp_tt(:,tt+1))).*(Zp_tt(:,tt+1)>0).*Zp_tt(:,tt+1);
+     Vpx_tt(:,tt+1) = (Zp_tt(:,tt+1)>0).*Vpx_tt(:,tt+1);
+     Vpy_tt(:,tt+1) = (Zp_tt(:,tt+1)>0).*Vpy_tt(:,tt+1);
      Vpz_tt(:,tt+1) = (Zp_tt(:,tt+1)>0).*Vpz_tt(:,tt+1);
      
      % Check if velocities stay realisitc
@@ -146,18 +149,24 @@ for tt = 1:Time_steps_for_particles
 
      %% Droplets
      if rain_on == 1
-         F_stokes_xd_tt(:,tt) = C_stokes_rain * (max(u(:,tt))-Vdx(:,tt);
-         F_stokes_yd_tt(:,tt) = C_stokes_rain * (max(u(:,tt))-Vdy(:,tt);
+         F_stokes_xd_tt(:,tt) = C_stokes_rain * (max(u(:,t))-Vdx_tt(:,tt));
+         F_stokes_yd_tt(:,tt) = C_stokes_rain * (-Vdy_tt(:,tt));
+         F_stokes_zd_tt(:,tt) = C_stokes_rain * (-Vdz_tt(:,tt));
          ad_x_tt(:,tt) = F_stokes_xd_tt(:,tt)/(rho_d*Vd);
-         ad_z_tt(:,tt) = F_stokes_yd_tt(:,tt)/(rho_d*Vd)-g;
-         Vdx_tt(:,tt+1) = Vdx(:,tt)+ad_x(:,tt)*Delta_Time_for_particles;
-         Vdy_tt(:,tt+1) = Vdy(:,tt)+ad_y(:,tt)*Delta_Time_for_particles;
-         Vdz_tt(:,tt+1) = Vdz(:,tt)+ad_z(:,tt)*Delta_Time_for_particles;
+         ad_y_tt(:,tt) = F_stokes_yd_tt(:,tt)/(rho_d*Vd);
+         ad_z_tt(:,tt) = F_stokes_zd_tt(:,tt)/(rho_d*Vd)-g;
+         Vdx_tt(:,tt+1) = Vdx_tt(:,tt)+ad_x_tt(:,tt)*Delta_Time_for_particles;
+         Vdy_tt(:,tt+1) = Vdy_tt(:,tt)+ad_y_tt(:,tt)*Delta_Time_for_particles;
+         Vdz_tt(:,tt+1) = Vdz_tt(:,tt)+ad_z_tt(:,tt)*Delta_Time_for_particles;
     
-         Xd_tt(:,tt+1) = Xd_tt(:,tt)+Vdx(:,tt)*Delta_Time_for_particles+ad_x+0.5*ad_x(:,tt)*Delta_Time_for_particles^2;
-         Yd_tt(:,tt+1) = Yd_tt(:,tt)+Vdx(:,tt)*Delta_Time_for_particles+ad_x+0.5*ad_y(:,tt)*Delta_Time_for_particles^2;
-         Zd_tt(:,tt+1) = Zd_tt(:,tt)+Vdx(:,tt)*Delta_Time_for_particles+ad_x+0.5*ad_z(:,tt)*Delta_Time_for_particles^2;
+         Xd_tt(:,tt+1) = Xd_tt(:,tt)+Vdx_tt(:,tt)*Delta_Time_for_particles+0.5*ad_x_tt(:,tt)*Delta_Time_for_particles^2;
+         Yd_tt(:,tt+1) = Yd_tt(:,tt)+Vdx_tt(:,tt)*Delta_Time_for_particles+0.5*ad_y_tt(:,tt)*Delta_Time_for_particles^2;
+         Zd_tt(:,tt+1) = Zd_tt(:,tt)+Vdx_tt(:,tt)*Delta_Time_for_particles+0.5*ad_z_tt(:,tt)*Delta_Time_for_particles^2;
          
+         % Go back to 1 m^3
+         Xd_tt(:,tt+1) = Xd_tt(:,tt+1)-floor(Xd_tt(:,tt+1));
+         Yd_tt(:,tt+1) = Yd_tt(:,tt+1)-floor(Yd_tt(:,tt+1));
+         Zd_tt(:,tt+1) = Zd_tt(:,tt+1)-floor(Zd_tt(:,tt+1));
      end
      
 end

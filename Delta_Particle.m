@@ -163,10 +163,10 @@ for tt = 1:Time_steps_for_particles
          Yd_tt(:,tt+1) = Yd_tt(:,tt)+Vdx_tt(:,tt)*Delta_Time_for_particles+0.5*ad_y_tt(:,tt)*Delta_Time_for_particles^2;
          Zd_tt(:,tt+1) = Zd_tt(:,tt)+Vdx_tt(:,tt)*Delta_Time_for_particles+0.5*ad_z_tt(:,tt)*Delta_Time_for_particles^2;
          
-         % Go back to 10 m^3
-         Xd_tt(:,tt+1) = Xd_tt(:,tt+1)-10*floor(0.1*Xd_tt(:,tt+1));
-         Yd_tt(:,tt+1) = Yd_tt(:,tt+1)-10*floor(0.1*Yd_tt(:,tt+1));
-         Zd_tt(:,tt+1) = Zd_tt(:,tt+1)-10*floor(0.1*Zd_tt(:,tt+1));
+         % Go back to 1 m^3
+         Xd_tt(:,tt+1) = Xd_tt(:,tt+1)-floor(Xd_tt(:,tt+1));
+         Yd_tt(:,tt+1) = Yd_tt(:,tt+1)-floor(Yd_tt(:,tt+1));
+         Zd_tt(:,tt+1) = Zd_tt(:,tt+1)-floor(Zd_tt(:,tt+1));
      end
      
 end

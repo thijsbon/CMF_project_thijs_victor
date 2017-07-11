@@ -1,40 +1,104 @@
 rng(1)
 tic
 clearvars -except l_effective u mu nu Delta_t Steady_State_on zc Time_steps Nz rho dz
-%%
-% Properties of Particles
-Np = 100;                 % Number of Particles
-np = 1000;                % 1 particle represents np particles
-Dp = 1e-5;                 % Diameter of Particle
-Vp = 4/3*pi*(Dp/2)^3;       % Volume particle
+%% Properties of Particles
+Np = 1000;                 % Number of Particles
+np = 1000;              % 1 particle represents np particles
+Dp = 1e-5;              % Diameter of Particle
+Vp = 4/3*pi*(Dp/2)^3;   % Volume particle
 rho_p = 2000;           % Density of particle
 mu = mean(mu);
-%%
+%% rain
 rain_on = 1;        % 1 on, 0 off
-Nd = 10;                %Number of druppels
+Nd = 1000;                %Number of druppels
 nd = 1000;              %1Nd Represents nd particles
 Dd = 1e-3;              %Diameter of druppel, range 5e-4 -> 5e-3
 Vd = 4/3*pi*(Dd/2)^3;   %Volume of druppel
 rho_d = 1000;           %Density of druppel
 C_stokes_rain = 3*pi*mu*Dd; %Stokes drag coefficient for droplets
 
-%C_stokes = 3*pi*mu*Dp^2;           % TO BE CHANGED
 C_stokes = 3*pi*mu*Dp;
 g = 9.81;               % Gravitational acceleration
 Time_steps_2 = Time_steps.*(Steady_State_on==0) + (Steady_State_on==1);
 Delta_Time_for_particles = 0.001;
+if Dp<1e-5
+    Delta_Time_for_particles = 0.0002;
+end
 Time_steps_for_particles = round(Delta_t/Delta_Time_for_particles);
+
+% Speed up, on/off
+speed_up = 1;       % 1 = on, 0 = off
+                    % When using 1, the sub time is calculated only for 100
+                    % time steps and from that a mean velocity and
+                    % deviation is calculated, which uses monte carlo to
+                    % determine the velocity and location at the next full
+                    % time step. USE ONLY WHEN YOU HAVE LIMITED TIME!
+                    % Using 0 uses the normal method, disered when you have
+                    % the time and resources.
+speed_up_method = 5;    % Use 1 for only statistical properties for 
+                        % location and velocity. This might have errors
+                        % Use 2 to calculate end velocities and locations
+                        % with accelerations calculated by statistical
+                        % properties. This might be better, however, this
+                        % can suffer from extreme accelerations.
+                        % Use 3 to use a linear extrapolate model. If
+                        % x_end-x_begin < 1*std(x) then the slope is
+                        % calculated by a = (x(:,end) - x(:,1)) /
+                        % (100*Delta_Time_for_particles -
+                        % 1*Delta_Time_for_particles)
+                        % And then the final locations are determined using
+                        % this extrapolation
+                        % If the end values are above/below 1*std, then the
+                        % same as setting 1 is used.
+                        % the 
+                        % Use 4 to do the average of 3 and 1.
+                        % Use 5 for terminal velocity model. This model
+                        % uses statistics everywhere, except for Zp which
+                        % uses zp_tt(:,end)-v_terminal*Delta_t, with
+                        % v_terminal = 2/9*Drho/mu *g*(Dp/2)^2
+                        % Use 6 for model of 5, where the Zp_tt = Zp_tt +
+                        % std(z)
+% LEES DIT!
+% Het blijkt uit mijn experimenten dat speed_up_method 1 het goed doet maar
+% onderpresteerd. 2 en 3 trekken de particles VEEL te snel naar de grond, 4
+% doet het medium, niet ideaal. Nummer 5 doet het erg goed, maar mist de
+% fluctuations die je krijgt als je het normaal uit rekent. Daarom doet
+% method 6 het heel goed, want die ziet er erg uit zoals het normaal
+% uitrekenen, zonder de reken kosten.
+% HET IS DAAROM AANGERADEN om model 5 te kiezen, en dan model 6 te runnen.
+% Als het verschil tussen 5 en 6 heel groot is, kies nummer 5.
+% Als het verschil tussen 5 en 6 klein is, kies nummer 6.
+% Je kan altijd spelen met Time_steps_for_particles om het proces te
+% versnellen, maar wees bewust van het feit dat de statistics dan fout
+% kunnen gaan.
+                        
+sub_method_2 = 3;       % Only need to use if speed_up_method = 2, if this 
+                        % value == 1, then the end location is calculated
+                        % according to the right value of Vpx
+                        % If the value == 2, the the end location is
+                        % calculated with the the last value of Vpx (which
+                        % is actually incorrect).
+                        % If the value == 3, uses a one time time step
+
+if speed_up == 1
+    Original_Time_steps_for_particles = Time_steps_for_particles;
+    Time_steps_for_particles = 100;
+    mod_6 = -log(5*Dp); % Constante nodig voor speed_up_method == 6
+end
+
 % Particle-Particle collisions
 Dp_effective = sqrt(np)*Dp;
 Dd_effective = sqrt(nd)*Dd;
 probability_ij = zeros(Np,Nd);
+V_relative = zeros(Np,Nd);
 droplet_particle_distance = zeros(Np,Nd);
+dpd_min = zeros(Np,1);
 minimum_distance = zeros(Np,1);
-Collision = zeros(Np,1);
 mu_d = 0.2;                     % friction coefficient (0 (frictionless sliding) to 0.4 (maximum friction))
 e_r = 0.9;                      % restitution coefficient (0.8 to 1 (e_r =1 == frictionless sliding))
-Collision = zeros(Np,Time_steps_2+1);
-Chance_to_get_stuck = 1/nd;     % 
+Collision = zeros(Np,Time_steps_2);
+Chance_to_get_stuck = 10/np;     % 
+dtt = Delta_Time_for_particles; % Used delta t in determination of probabilities, influences the amount of collisions very much.
 
 % INSERT (DUST) PARTICLES
 Xp = zeros(Np,Time_steps_2+1);
@@ -60,9 +124,9 @@ distance_to_grid = zeros(Np,Time_steps_2);
 % INSERT DROPLETS
 Xd = zeros(Nd,Time_steps_2+1);
 Yd = Xd;Zd = Xd;
-Xd(:,1) = 10*rand(Nd,1);   % X start position of particles
-Yd(:,1) = 10*rand(Nd,1);   % Y start position of particles
-Zd(:,1) = 10*rand(Nd,1);   % Z start position of particles
+Xd(:,1) = rand(Nd,1);   % X start position of particles
+Yd(:,1) = rand(Nd,1);   % Y start position of particles
+Zd(:,1) = rand(Nd,1);   % Z start position of particles
 Vdx = zeros(Nd,Time_steps_2+1);
 Vdy = Vdx;
 Vdz = Vdx;
@@ -99,7 +163,7 @@ w_prime(:,1) = 0.1*randn(Np,1);
 
 %%
 upper = 0;
-%Time_steps_2 = 1;
+%Time_steps_2 = 10;
 toc
 for t=1:Time_steps_2
     tic
@@ -143,14 +207,20 @@ for t=1:Time_steps_2
         %% Droplet-Particle Collision
         % Determination of collision
         probability_ij = zeros(Np,Nd);
-        dtt = 1; % Used delta t
         for particle=1:Np
-            droplet_particle_distance(particle,:) = sqrt((Xp(particle,t+1)-floor(Xp(particle,t+1))-Xd(:,t+1)).^2+(Yp(particle,t+1)-floor(Yp(particle,t+1))-Yd(:,t+1)).^2+(Zp(particle,t+1)-floor(Zp(particle,t+1))-Zd(:,t+1)).^2);
-            probability_ij(particle,:) = (np/2+nd/2)*pi*(Dp_effective/2+Dd_effective/2)^2.*(sqrt((Vpx(particle,t+1)-Vdx(:,t+1)').^2+(Vpy(particle,t+1)-Vdy(:,t+1)').^2+(Vpz(particle,t+1)-Vdz(:,t+1)').^2))*Delta_Time_for_particles;
+            %droplet_particle_distance(particle,:) = sqrt((Xp(particle,t+1)-floor(Xp(particle,t+1))-Xd(:,t+1)).^2+(Yp(particle,t+1)-floor(Yp(particle,t+1))-Yd(:,t+1)).^2+(Zp(particle,t+1)-floor(Zp(particle,t+1))-Zd(:,t+1)).^2);
+            droplet_particle_distance(particle,:) = sqrt((Xd(:,t+1)-Xp(particle,t+1)+floor(Xp(particle,t+1))).^2+(Yd(:,t+1)-Yp(particle,t+1)+floor(Yp(particle,t+1))).^2+(Zd(:,t+1)-Zp(particle,t+1)+floor(Zp(particle,t+1))).^2);
+            V_relative(particle,:) = (sqrt((Vpx(particle,t+1)-Vdx(:,t+1)').^2+(Vpy(particle,t+1)-Vdy(:,t+1)').^2+(Vpz(particle,t+1)-Vdz(:,t+1)').^2));
+            probability_ij(particle,:) = (np/2+nd/2)*pi*(Dp_effective/2+Dd_effective/2)^2.*V_relative(particle,:)*10*Delta_Time_for_particles;
             minimum_distance(particle) = find(min(droplet_particle_distance(particle,:))==droplet_particle_distance(particle,:));
-            Collision(particle,t) = droplet_particle_distance(particle,minimum_distance(particle))<(sqrt((Vpx(particle,t+1)-Vdx(minimum_distance(particle),t+1)).^2+(Vpy(particle,t+1)-Vdy(minimum_distance(particle),t+1)).^2+(Vpz(particle,t+1)-Vdz(minimum_distance(particle),t+1)).^2)...
-                *(dtt).*(droplet_particle_distance(particle,minimum_distance(particle))).*(probability_ij(particle,minimum_distance(particle))>rand(1,1)));
+            dpd_min(particle) = droplet_particle_distance(particle,minimum_distance(particle));
+            % A Collision happens when:
+            % 1: distance dust particle to droplet < Vrelative*dtt
+            % 2: probability_ij>uniform value between [0,1]
+            Collision(particle,t) = dpd_min(particle)<V_relative(particle,minimum_distance(particle))...
+                .*(dtt).*(probability_ij(particle,minimum_distance(particle))>rand(1,1));
         end
+        mean_min_distance(t) =mean(dpd_min);    % Dummy variable to check if collisions work
         %% Collision model
         % Calculate direction vectors
         nx = -Xp(:,t)+Xd(minimum_distance,t);
@@ -177,19 +247,10 @@ for t=1:Time_steps_2
             .*(1+e_r)*rho_d*Vd/(rho_p*Vp+rho_d*Vd)+(Collision(:,t)==0).*Vpz(:,t+1);
     end
     % Small chance particles get stuck in rain
-
     Zp(:,t+1) = (Collision(:,t)==0).*Zp(:,t+1)+(Collision(:,t)==1).*(rand(Np,1)>Chance_to_get_stuck).*Zp(:,t+1);
-    % Check if particle does not go above 1000m
-    %w_prime(:,t) = (Zp(:,t+1)<1000).*w_prime(:,t);
-    
-     %% Inter particle collisions NIET AF!
-%      for particle=1:Np
-%          inter_particle_distance(particle,:) = sqrt((Xp(:,t+1)-Xp(particle,t+1)).^2+(Yp(:,t+1)-Yp(particle,t+1)).^2+(Zp(:,t+1)-Zp(particle,t+1)).^2)';
-%          %if inter_particle_distance(particle,:)'<100*sqrt((Vpx(:,t+1)-Vpx(particle,t+1)).^2+(Vpy(:,t+1)-Vpy(particle,t+1)).^2+(Vpz(:,t+1)-Vpz(particle,t+1)).^2)*Delta_t
-%             probability_ij(particle,:) = np*pi*Dp_effective^2.*sqrt((Vpx(:,t+1)-Vpx(particle,t+1)).^2+(Vpy(:,t+1)-Vpy(particle,t+1)).^2+(Vpz(:,t+1)-Vpz(particle,t+1)).^2)*Delta_t;
-%          %end
-%      end    
-    
     Time(t+1) = t*Delta_t;
     toc
 end
+
+%distance = mean(mean_min_distance)
+%collisions = sum(sum(Collision))

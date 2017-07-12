@@ -2,15 +2,15 @@ rng(1)
 tic
 clearvars -except l_effective u mu nu Delta_t Steady_State_on zc Time_steps Nz rho dz
 %% Properties of Particles
-Np = 1000;                 % Number of Particles
+Np = 10;                 % Number of Particles
 np = 1000;              % 1 particle represents np particles
-Dp = 1e-5;              % Diameter of Particle
+Dp = 5e-5;              % Diameter of Particle
 Vp = 4/3*pi*(Dp/2)^3;   % Volume particle
 rho_p = 2000;           % Density of particle
 mu = mean(mu);
 %% rain
 rain_on = 1;        % 1 on, 0 off
-Nd = 1000;                %Number of druppels
+Nd = 1;                %Number of druppels
 nd = 1000;              %1Nd Represents nd particles
 Dd = 1e-3;              %Diameter of druppel, range 5e-4 -> 5e-3
 Vd = 4/3*pi*(Dd/2)^3;   %Volume of druppel
@@ -35,7 +35,7 @@ speed_up = 1;       % 1 = on, 0 = off
                     % time step. USE ONLY WHEN YOU HAVE LIMITED TIME!
                     % Using 0 uses the normal method, disered when you have
                     % the time and resources.
-speed_up_method = 5;    % Use 1 for only statistical properties for 
+speed_up_method = 7;    % Use 1 for only statistical properties for 
                         % location and velocity. This might have errors
                         % Use 2 to calculate end velocities and locations
                         % with accelerations calculated by statistical
@@ -58,6 +58,9 @@ speed_up_method = 5;    % Use 1 for only statistical properties for
                         % v_terminal = 2/9*Drho/mu *g*(Dp/2)^2
                         % Use 6 for model of 5, where the Zp_tt = Zp_tt +
                         % std(z)
+                        % Model 7 is similar to model 5, however, it allows
+                        % to increase the average velocity effect with the
+                        % add_precentage variable
 % LEES DIT!
 % Het blijkt uit mijn experimenten dat speed_up_method 1 het goed doet maar
 % onderpresteerd. 2 en 3 trekken de particles VEEL te snel naar de grond, 4
@@ -71,7 +74,8 @@ speed_up_method = 5;    % Use 1 for only statistical properties for
 % Je kan altijd spelen met Time_steps_for_particles om het proces te
 % versnellen, maar wees bewust van het feit dat de statistics dan fout
 % kunnen gaan.
-                        
+   
+add_percentage = 1.06;  % Use 1.06 for a Dp=1e-5
 sub_method_2 = 3;       % Only need to use if speed_up_method = 2, if this 
                         % value == 1, then the end location is calculated
                         % according to the right value of Vpx
@@ -82,7 +86,7 @@ sub_method_2 = 3;       % Only need to use if speed_up_method = 2, if this
 
 if speed_up == 1
     Original_Time_steps_for_particles = Time_steps_for_particles;
-    Time_steps_for_particles = 100;
+    Time_steps_for_particles = 1000;
     mod_6 = -log(5*Dp); % Constante nodig voor speed_up_method == 6
 end
 
@@ -120,6 +124,7 @@ F_stokes_y = a_x;
 F_stokes_z = a_x;
 F_gravity = a_x;
 distance_to_grid = zeros(Np,Time_steps_2);
+Landing_time = ones(Np,2);
 
 % INSERT DROPLETS
 Xd = zeros(Nd,Time_steps_2+1);
@@ -188,7 +193,8 @@ for t=1:Time_steps_2
     v_prime(:,t+1) = v_prime_tt(:,end);
     w_prime(:,t+1) = w_prime_tt(:,end);
     eddy_life_time(:,t+1) = eddy_life_time_tt(:,end);
-    
+       
+    %% Rain
     if rain_on == 1
         ad_x(:,t+1) = ad_x_tt(:,end);
         ad_y(:,t+1) = ad_x_tt(:,end);
@@ -208,6 +214,17 @@ for t=1:Time_steps_2
         % Determination of collision
         probability_ij = zeros(Np,Nd);
         for particle=1:Np
+            %% Landing time registration (done in this loop to reduce time
+            if Zp(particle,t+1)==0 && Zp(particle,t)>0
+                Landing_time(particle,1) = (t+1)*Delta_t;
+                Landing_time(particle,2) = t+1;
+            end
+            %% Check if particle doesn't move when it touched the ground
+            Xp(particle,t+1) = Xp(particle,t+1).*((Landing_time(particle,2))==1)+Xp(particle,Landing_time(particle,2)).*((Landing_time(particle,2))>1);
+            Yp(particle,t+1) = Yp(particle,t+1).*((Landing_time(particle,2))==1)+Yp(particle,Landing_time(particle,2)).*((Landing_time(particle,2))>1);
+            Zp(particle,t+1) = Zp(particle,t+1).*((Landing_time(particle,2))==1)+Zp(particle,Landing_time(particle,2)).*((Landing_time(particle,2))>1);
+
+            %% Collision part
             %droplet_particle_distance(particle,:) = sqrt((Xp(particle,t+1)-floor(Xp(particle,t+1))-Xd(:,t+1)).^2+(Yp(particle,t+1)-floor(Yp(particle,t+1))-Yd(:,t+1)).^2+(Zp(particle,t+1)-floor(Zp(particle,t+1))-Zd(:,t+1)).^2);
             droplet_particle_distance(particle,:) = sqrt((Xd(:,t+1)-Xp(particle,t+1)+floor(Xp(particle,t+1))).^2+(Yd(:,t+1)-Yp(particle,t+1)+floor(Yp(particle,t+1))).^2+(Zd(:,t+1)-Zp(particle,t+1)+floor(Zp(particle,t+1))).^2);
             V_relative(particle,:) = (sqrt((Vpx(particle,t+1)-Vdx(:,t+1)').^2+(Vpy(particle,t+1)-Vdy(:,t+1)').^2+(Vpz(particle,t+1)-Vdz(:,t+1)').^2));
@@ -245,6 +262,18 @@ for t=1:Time_steps_2
             .*(1+e_r)*rho_d*Vd/(rho_p*Vp+rho_d*Vd)+(Collision(:,t)==0).*Vpy(:,t+1);
         Vpz(:,t+1) = (Collision(:,t)==1).*Vpz(:,t+1)-(nz-mu_d*tz).*(nx.*Gbx+ny.*Gby+nz.*Gbz)...
             .*(1+e_r)*rho_d*Vd/(rho_p*Vp+rho_d*Vd)+(Collision(:,t)==0).*Vpz(:,t+1);
+    else
+         for particle=1:Np
+            %% Landing time registration (done in this loop to reduce time
+            if Zp(particle,t+1)==0 && Zp(particle,t)>0
+                Landing_time(particle,1) = (t+1)*Delta_t;
+                Landing_time(particle,2) = t+1;
+            end
+            %% Check if particle doesn't move when it touched the ground
+            Xp(particle,t+1) = Xp(particle,t+1).*((Landing_time(particle,2))==1)+Xp(particle,Landing_time(particle,2)).*((Landing_time(particle,2))>1);
+            Yp(particle,t+1) = Yp(particle,t+1).*((Landing_time(particle,2))==1)+Yp(particle,Landing_time(particle,2)).*((Landing_time(particle,2))>1);
+            Zp(particle,t+1) = Zp(particle,t+1).*((Landing_time(particle,2))==1)+Zp(particle,Landing_time(particle,2)).*((Landing_time(particle,2))>1);
+         end
     end
     % Small chance particles get stuck in rain
     Zp(:,t+1) = (Collision(:,t)==0).*Zp(:,t+1)+(Collision(:,t)==1).*(rand(Np,1)>Chance_to_get_stuck).*Zp(:,t+1);

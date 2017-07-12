@@ -282,19 +282,29 @@ if speed_up == 1
         Vpx_tt(:,end) = Vpx_statistics(:,1)+Vpx_statistics(:,2).*randn(Np,1);
         Vpy_tt(:,end) = Vpy_statistics(:,1)+Vpy_statistics(:,2).*randn(Np,1);
         Vpz_tt(:,end) = Vpz_statistics(:,1)+Vpz_statistics(:,2).*randn(Np,1);
-        Xp_tt(:,end) = Xp_statistics(:,1)+Xp_statistics(:,2).*randn(Np,1);
-        Yp_tt(:,end) = Yp_statistics(:,1)+Yp_statistics(:,2).*randn(Np,1);
+        Xp_tt(:,end) = Xp_statistics(:,1)+Xp_statistics(:,2).*randn(Np,1)+Vpx_statistics(:,1)*(Delta_t-Time_steps_for_particles*Delta_Time_for_particles);
+        Yp_tt(:,end) = Yp_statistics(:,1)+Yp_statistics(:,2).*randn(Np,1)+Vpy_statistics(:,1)*(Delta_t-Time_steps_for_particles*Delta_Time_for_particles);
         Zp_tt(:,end) = Zp_tt(:,end)-2/9*(rho_p-rho)/mu*g*(Dp/2)^2*(Delta_t-Time_steps_for_particles*Delta_Time_for_particles);
     elseif speed_up_method == 6
         Vpx_tt(:,end) = Vpx_statistics(:,1)+Vpx_statistics(:,2).*randn(Np,1);
         Vpy_tt(:,end) = Vpy_statistics(:,1)+Vpy_statistics(:,2).*randn(Np,1);
         Vpz_tt(:,end) = Vpz_statistics(:,1)+Vpz_statistics(:,2).*randn(Np,1);
-        Xp_tt(:,end) = Xp_statistics(:,1)+Xp_statistics(:,2).*randn(Np,1);
-        Yp_tt(:,end) = Yp_statistics(:,1)+Yp_statistics(:,2).*randn(Np,1);
+        Xp_tt(:,end) = Xp_statistics(:,1)+Xp_statistics(:,2).*randn(Np,1)+Vpx_statistics(:,1)*(Delta_t-Time_steps_for_particles*Delta_Time_for_particles);
+        Yp_tt(:,end) = Yp_statistics(:,1)+Yp_statistics(:,2).*randn(Np,1)+Vpy_statistics(:,1)*(Delta_t-Time_steps_for_particles*Delta_Time_for_particles);
         Zp_tt(:,end) = Zp_tt(:,end)+mod_6*Zp_statistics(:,2).*randn(Np,1)-2/9*(rho_p-rho)/mu*g*(Dp/2)^2*(Delta_t-Time_steps_for_particles*Delta_Time_for_particles);
+    elseif speed_up_method == 7
+        Vpx_tt(:,end) = Vpx_statistics(:,1)+Vpx_statistics(:,2).*randn(Np,1);
+        Vpy_tt(:,end) = Vpy_statistics(:,1)+Vpy_statistics(:,2).*randn(Np,1);
+        Vpz_tt(:,end) = Vpz_statistics(:,1)+Vpz_statistics(:,2).*randn(Np,1);
+        Xp_tt(:,end) = Xp_statistics(:,1)+Xp_statistics(:,2).*randn(Np,1)+add_percentage*Vpx_statistics(:,1)*(Delta_t-Time_steps_for_particles*Delta_Time_for_particles);
+        Yp_tt(:,end) = Yp_statistics(:,1)+Yp_statistics(:,2).*randn(Np,1)+Vpy_statistics(:,1)*(Delta_t-Time_steps_for_particles*Delta_Time_for_particles);
+        Zp_tt(:,end) = Zp_tt(:,end)-2/9*(rho_p-rho)/mu*g*(Dp/2)^2*(Delta_t-Time_steps_for_particles*Delta_Time_for_particles);
+
     end
     % Check if particle does not go below ground
     Zp_tt(:,end) = (~isnan(Zp_tt(:,end))).*(Zp_tt(:,end)>0).*Zp_tt(:,end);
+    Xp_tt(:,end) = (~isnan(Zp_tt(:,end))).*(Zp_tt(:,end)>0).*Xp_tt(:,end)+(~isnan(Zp_tt(:,end))).*(Zp_tt(:,end)==0).*Xp_tt(:,tt-1);
+    Yp_tt(:,end) = (~isnan(Zp_tt(:,end))).*(Zp_tt(:,end)>0).*Yp_tt(:,end)+(~isnan(Zp_tt(:,end))).*(Zp_tt(:,end)==0).*Yp_tt(:,tt-1);
     Vpx_tt(:,end) = (Zp_tt(:,end)>0).*Vpx_tt(:,end);
     Vpy_tt(:,end) = (Zp_tt(:,end)>0).*Vpy_tt(:,end);
     Vpz_tt(:,end) = (Zp_tt(:,end)>0).*Vpz_tt(:,end);

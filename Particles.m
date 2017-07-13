@@ -280,6 +280,7 @@ for t=1:Time_steps_2
     Time(t+1) = t*Delta_t;
     toc
 end
-
+name = ['rain_' num2str(rain_on) '_dust_particles_diameter_' num2str(Dp) '_dust_particles_number_' num2str(Np) '_rain_particles_' num2str(Nd) '_Delta_t_' num2str(Delta_t) '_Delta_t_of_particles_' num2str(Delta_Time_for_particles)];
+save name
 %distance = mean(mean_min_distance)
 %collisions = sum(sum(Collision))

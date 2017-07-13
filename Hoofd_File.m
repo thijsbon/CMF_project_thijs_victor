@@ -17,7 +17,7 @@ unsteady_function = 0;  % Use only for transient, use 0 for prescribed pressure
                         % These can be modified in the function files
 Time_steps = 100;        % Use for transient mode
 Delta_t = 10;         % Seconds between time steps
-omega_unsteady = 0.01;   % Frequency (in Hz) at which the unsteady_functions change
+omega_unsteady = 7.27e-5;   % Frequency (in Hz) at which the unsteady_functions change
 tf = 1;                 % 0 for explicit time scheme
 
                         % 1 for implicit time scheme
@@ -74,7 +74,7 @@ rho             = 1.225;    % density of air
 mu              = 15*10^-6;   %viscosity
 nu              = mu/rho;   %viscosity
 
-dpdx            = -0.0001;   % prescribed pressure gradient
+dpdx            = -0.001;   % prescribed pressure gradient
 
 Q               =  2;    % prescribed flow rate per area in m^2/s (2-dimensional)
 

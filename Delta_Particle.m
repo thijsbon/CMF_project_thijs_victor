@@ -192,6 +192,7 @@ if speed_up == 1
     v_prime_statistics = [mean(v_prime_tt')' std(v_prime_tt')'];
     w_prime_statistics = [mean(w_prime_tt')' std(w_prime_tt')'];
     eddy_life_time_statistics = [mean(eddy_life_time_tt')' std(eddy_life_time_tt')'];
+    if rain_on ==1
     % Droplet
     ad_x_statistics = [mean(ad_x_tt')' std(ad_x_tt')'];
     ad_y_statistics = [mean(ad_y_tt')' std(ad_y_tt')'];
@@ -205,6 +206,7 @@ if speed_up == 1
     F_stokes_xd_statistics = [mean(F_stokes_xd_tt')' std(F_stokes_xd_tt')'];
     F_stokes_yd_statistics = [mean(F_stokes_yd_tt')' std(F_stokes_yd_tt')'];
     F_stokes_zd_statistics = [mean(F_stokes_zd_tt')' std(F_stokes_zd_tt')'];
+    end
     %% New end values
     % Dust particles
     F_stokes_x_tt(:,end) = F_stokes_x_statistics(:,1)+F_stokes_x_statistics(:,2).*randn(Np,1);
@@ -309,6 +311,7 @@ if speed_up == 1
     Vpy_tt(:,end) = (Zp_tt(:,end)>0).*Vpy_tt(:,end);
     Vpz_tt(:,end) = (Zp_tt(:,end)>0).*Vpz_tt(:,end);
     
+    if rain_on==1
     % Droplet(Not really necessary)
     Droplet_necessary =1;
     if Droplet_necessary == 1
@@ -329,5 +332,6 @@ if speed_up == 1
         Xd_tt(:,end) = Xd_tt(:,end)-floor(Xd_tt(:,end));
         Yd_tt(:,end) = Yd_tt(:,end)-floor(Yd_tt(:,end));
         Zd_tt(:,end) = Zd_tt(:,end)-floor(Zd_tt(:,end));
+    end
     end
 end
